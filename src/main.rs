@@ -1,4 +1,5 @@
 mod conn;
+mod message;
 mod node;
 
 fn main() {
