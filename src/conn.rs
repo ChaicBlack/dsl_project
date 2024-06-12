@@ -1,9 +1,8 @@
+use log::info;
 use std::{
     io::{self, Write},
     net::TcpStream,
 };
-
-use log::info;
 
 use crate::node::Node;
 

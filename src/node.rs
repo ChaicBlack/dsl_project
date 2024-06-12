@@ -10,16 +10,23 @@ pub struct Node {
 }
 
 impl Node {
-    // id needs to be allocated serially or ask server(Does it means I need to implement server
-    // node?)
-    pub fn new(id: u32, name: String, log_file_path: &str) -> Self {
+    pub fn new(
+        id: u32,
+        name: String,
+        log_file_path: &str,
+        addr: &str,
+        neighbors: Vec<&str>,
+    ) -> Self {
         let log_file = File::create(log_file_path).unwrap();
         WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
 
-        Self {
+        let neighbors = neighbors.into_iter().map(|s| s.parse().unwrap()).collect();
+
+        Node {
             id,
             name,
-            neighbors: Vec::new(),
+            addr: addr.parse().unwrap(),
+            neighbors,
         }
     }
 

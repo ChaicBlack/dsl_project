@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 log = "0.4.21"
 simplelog = "0.12.2"
+tokio = "1.38.0"
