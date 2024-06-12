@@ -1,10 +1,12 @@
 use log::{info, LevelFilter};
 use simplelog::{Config, WriteLogger};
-use std::fs::File;
+use std::{collections::HashSet, fs::File, net::SocketAddr};
 
 pub struct Node {
     pub id: u32,
     pub name: String,
+    pub addr: SocketAddr,
+    pub neighbors: HashSet<SocketAddr>,
 }
 
 impl Node {
@@ -14,7 +16,11 @@ impl Node {
         let log_file = File::create(log_file_path).unwrap();
         WriteLogger::init(LevelFilter::Info, Config::default(), log_file).unwrap();
 
-        Self { id, name }
+        Self {
+            id,
+            name,
+            neighbors: Vec::new(),
+        }
     }
 
     pub fn do_something(&self) {
