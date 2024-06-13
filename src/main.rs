@@ -13,6 +13,9 @@ fn main() {
 
     node.start();
     node.do_something();
+
+    node.broadcast("hello you!");
+
     node.stop();
 
     log::logger().flush();
