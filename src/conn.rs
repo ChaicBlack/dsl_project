@@ -1,11 +1,10 @@
-use bytes::{Buf, BytesMut};
 use log::info;
 use std::io::Cursor;
 use std::net::SocketAddr;
-use tokio::io::{self, AsyncWriteExt, AsyncWriteExt};
+use tokio::io::{self, AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
-use crate::frame::Frame;
+use crate::frame::{self, Frame};
 use crate::node::Node;
 
 pub struct Connection {
@@ -24,7 +23,7 @@ impl Connection {
         }
     }
 
-    pub async fn read_frame(&mut self) -> Result<Option<Frame>> {
+    pub async fn read_frame(&mut self) -> crate::Result<Option<Frame>> {
         loop {
             // if there are a whole frame in the buffer, read it and return
             if let Some(frame) = self.parse_frame()? {
@@ -50,9 +49,62 @@ impl Connection {
         }
     }
 
-    pub async fn write_frame(&mut self, frame: &Frame) -> Result<()> {}
+    pub async fn write_frame(&mut self, frame: &Frame) -> io::Result<()> {
+        match frame {
+            Frame::Array(val) => {
+                self.stream.write_u8(b'*').await?;
 
-    fn parse_frame(&mut self) -> Result<Option<Frame>> {
+                self.write_decimal(val.len() as u64).await?;
+
+                for entry in &**val {
+                    self.write_value(entry).await?;
+                }
+            }
+
+            _ => self.write_value(frame).await?;
+        }
+
+        // The calls above are to the buffered stream and writes.
+        self.stream.flush().await
+    }
+
+    async fn write_value(&mut self, frame: &Frame) -> io::Result<()> {
+        match frame {
+            Frame::Simple(val) => {
+                self.stream.write_u8(b'*').await?;
+                self.stream.write_all(val.as_bytes()).await?;
+                self.stream.write_all(b"\r\n").await?;
+            }
+            Frame::Error(val) => {
+                self.stream.write_u8(b'-').await?;
+                self.stream.write_all(val.as_bytes()).await?;
+                self.stream.write_all(b"\r\n").await?;
+            }
+            Frame::Integer(val) => {
+                self.stream.write_u8(b':').await?;
+                self.write_decimal(*val).await?;
+            }
+            Frame::Null => {
+                self.stream.write_all(b"$-1\r\n").await?;
+            }
+            Frame::Bulk(val) => {
+                let len = val.len();
+
+                self.stream.write_u8(b'$').await?;
+                self.write_decimal(len as u64).await?;
+                self.stream.write_all(val).await?;
+                self.stream.write_all(b"\r\n").await?;
+            }
+
+            Frame::Array(_val) => unreachable!(),
+        }
+
+        Ok(())
+    }
+
+    fn parse_frame(&mut self) -> crate::Result<Option<Frame>> {
+        use frame::Error::Imcomplete;
+
         let mut buf = Cursor::new(&self.buffer[..]);
 
         match Frame::check(&mut buf) {

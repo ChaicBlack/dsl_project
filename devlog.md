@@ -4,8 +4,15 @@
 3. Connection and messages sending need to be asynchronously implememted by Tokio.
 4. I need several other instances using this code to be proposer, acceptor and learner. I am not sure if I can place tham in a bin folder like in tokio tutorial while keeping use the lib code.
 
-16/Jub/2024
-1. Frame, Freme::check, Frame::parse.
+16/Jun/2024
+1. Frame, Frame::check, Frame::parse.
 2. Result.
 3. buffer::advance.
 4. Any way, check the source code of mini-redis and implement the same way.
+
+16/Jun/2024 night
+Completed:
+    Feagured out what frame is.
+    write_frame, write_value, check.
+To be completed:
+    write_decimal, parse, advance, into, get_u8, get_line, get_decimal, skip, peek_u8, try_into.
