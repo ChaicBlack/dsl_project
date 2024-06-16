@@ -1,12 +1,12 @@
 use log::info;
-use std::{
-    io::{self, Write},
-    net::{SocketAddr, TcpStream},
-};
+use std::net::SocketAddr;
+use tokio::io::{self, AsyncWriteExt};
+use tokio::net::TcpStream;
 
 use crate::node::Node;
 
 impl Node {
+    //This need to be refactored after send_message been completed
     pub fn broadcast(&self, message: &str) {
         for neighbor in &self.neighbors {
             if let Err(e) = self.send_message(message, neighbor) {
@@ -17,19 +17,13 @@ impl Node {
         }
     }
 
-    pub fn send_message(&self, message: &str, target: &SocketAddr) -> io::Result<()> {
-        match TcpStream::connect(target) {
-            Ok(mut stream) => {
-                stream.write_all(message.as_bytes())?;
-                info!(
-                    "message {} from {} sent to {}.",
-                    message,
-                    self.addr.to_string(),
-                    target.to_string()
-                );
-                Ok(())
-            }
-            Err(e) => Err(e),
-        }
+    // Afte all I need to implement a dedicated task to handle IO using mpsc.
+    pub async fn send_message(&self, message: &str, target: &SocketAddr) -> io::Result<()> {
+        let socket = TcpStream::connect(target).await?;
+
+        socket.write_frame(Frame).await?; // I need to implement my own Frame and connection just
+                                          // like mini_redis in tutorial
+
+        Ok(())
     }
 }
