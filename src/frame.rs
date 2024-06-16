@@ -1,4 +1,4 @@
-enum Message {
+pub enum Frame {
     Heartbeat(u32), // id number
     Prepare {
         id: u32,
