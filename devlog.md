@@ -16,3 +16,10 @@ Completed:
     write_frame, write_value, check.
 To be completed:
     write_decimal, parse, advance, into, get_u8, get_line, get_decimal, skip, peek_u8, try_into.
+
+17/Jun/2024 afternoon
+Completed:
+    Feagured out what cursor for.
+    write_decimal, skip, peek_u8, get_u8
+To be completed:
+    parse, advance, into, get_line, get_decimal, try_into.

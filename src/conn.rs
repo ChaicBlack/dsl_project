@@ -102,6 +102,23 @@ impl Connection {
         Ok(())
     }
 
+    // write a decimal frame to the stream
+    async fn write_decimal(&mut self, val: u64) -> io::Result<()> {
+        use std::io::Write;
+
+        // convert the value to a string
+        let mut buf = [0u8; 20];
+        let mut buf = Cursor::new(&mut buf[..]);
+        write!(&mut buf, "{}", val);
+
+        let pos = buf.position() as usize;
+        // get_ref() return the reference to inner value
+        self.stream.write_all(&buf.get_ref()[..pos]).await?;
+        self.stream.write_all(b"\r\n").await?;
+
+        Ok(())
+    }
+
     fn parse_frame(&mut self) -> crate::Result<Option<Frame>> {
         use frame::Error::Imcomplete;
 

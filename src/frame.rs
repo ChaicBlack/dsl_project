@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use bytes::Bytes;
+use bytes::{Buf, Bytes};
 
 #[derive(Clone, Debug)]
 pub enum Frame {
@@ -58,4 +58,29 @@ impl Frame {
             actual => Err(format!("protocol error; invalid frame type byte `{}`", actual).into()),
         }
     }
+}
+
+fn peek_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
+    if !src.has_remaining() {
+        return Err(Error::Imcomplete);
+    }
+
+    Ok(src.chunk()[0])
+}
+
+fn get_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
+    if !src.has_remaining() {
+        return Err(Error::Imcomplete);
+    }
+
+    Ok(src.get_u8())
+}
+
+fn skip(src: &mut Cursor<&[u8]>, n: usize) -> Result<(), Error> {
+    if src.remaining() < n {
+        return Err(Error::Imcomplete);
+    }
+
+    src.advance(n);
+    Ok(())
 }
