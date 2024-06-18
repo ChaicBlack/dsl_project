@@ -59,7 +59,7 @@ impl Frame {
                         return Err(Error::Imcomplete);
                     }
 
-                    let data = Bytes::copy_to_slice(&src.chunk()[..len]);
+                    let data = Bytes::copy_from_slice(&src.chunk()[..len]);
 
                     skip(src, n)?;
 

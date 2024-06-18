@@ -28,4 +28,4 @@ To be completed:
 Completed:
     parse, 
 To be completed:
-    to_vec, 
+    to_vec, into, advance, get_line, get_decimal, try_into
