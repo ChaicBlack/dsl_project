@@ -1,25 +1,24 @@
+use bytes::BytesMut;
 use log::info;
-use std::io::Cursor;
+use std::io::{self, Cursor};
 use std::net::SocketAddr;
-use tokio::io::{self, AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, BufWriter};
 use tokio::net::TcpStream;
 
 use crate::frame::{self, Frame};
 use crate::node::Node;
 
 pub struct Connection {
-    stream: TcpStream,
-    buffer: Vec<u8>,
-    cursor: usize,
+    stream: BufWriter<TcpStream>,
+    buffer: BytesMut,
 }
 
 impl Connection {
-    pub fn new(stream: TcpStream) -> Connection {
+    pub fn new(socket: TcpStream) -> Connection {
         Connection {
-            stream,
+            stream: BufWriter::new(socket),
             // allocating a 4kb buffer
-            buffer: vec![0; 4096],
-            cursor: 0,
+            buffer: BytesMut::with_capacity(4 * 1024),
         }
     }
 
@@ -30,21 +29,16 @@ impl Connection {
                 return Ok(Some(frame));
             }
 
-            if self.buffer.len() == self.cursor {
-                self.buffer.resize(self.cursor * 2, 0);
-            }
-
-            let n = self.stream.read(&mut self.buffer[self.cursor..]).await?;
-
-            // if not, read more data from socket into buffer
-            if 0 == n {
-                if self.cursor == 0 {
+            if 0 == self.stream.read_buf(&mut self.buffer).await? {
+                // The remote closed the connection. For this to be a clean
+                // shutdown, there should be no data in the read buffer. If
+                // there is, this means that the peer closed the socket while
+                // sending a frame.
+                if self.buffer.is_empty() {
                     return Ok(None);
                 } else {
                     return Err("connection reset by peer".into());
                 }
-            } else {
-                self.cursor += n;
             }
         }
     }
@@ -61,7 +55,7 @@ impl Connection {
                 }
             }
 
-            _ => self.write_value(frame).await?;
+            _ => self.write_value(frame).await?,
         }
 
         // The calls above are to the buffered stream and writes.

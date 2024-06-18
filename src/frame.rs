@@ -22,7 +22,63 @@ pub enum Error {
 }
 
 impl Frame {
-    fn parse() -> Result<()> {}
+    pub fn parse(src: &mut Cursor<&[u8]>) -> Result<Frame, Error> {
+        match get_u8(src)? {
+            b'+' => {
+                let line = get_line(src)?.to_vec();
+
+                let string = String::from_utf8(line)?;
+
+                Ok(Frame::Simple(string))
+            }
+            b'-' => {
+                let line = get_line(src)?.to_vec();
+
+                let string = String::from_utf8(line)?;
+
+                Ok(Frame::Error(string))
+            }
+            b':' => {
+                let len = get_decimal(src)?
+                Ok(Frame::Integer(len))
+            }
+            b'$' => {
+                if b'-' == peek_u8(src)? {
+                    let line = get_line(src)?;
+
+                    if line != b"-1" {
+                        return Err("protocol error; invalid frame format".into());
+                    }
+
+                    Ok(Frame::Null)
+                }else {
+                    let len = get_decimal(src)?;
+                    let n = len + 2;
+
+                    if src.remaining() < n {
+                        return Err(Error::Imcomplete);
+                    }
+
+                    let data = Bytes::copy_to_slice(&src.chunk()[..len]);
+
+                    skip(src, n)?;
+
+                    Ok(Frame::Bulk(data))
+                }
+            }
+            b'*' => {
+                let len = get_decimal(src)?.try_into()?;
+                let mut out = Vec::with_capacity(len);
+
+                for _ in 0..len {
+                    out.push(Frame::parse(src)?);
+                }
+
+                Ok(Frame::Array(out))
+            }
+            _ => unimplemented!(),
+        }
+    }
 
     pub fn check(src: &mut Cursor<&[u8]>) -> Result<(), Error> {
         match get_u8(src)? {

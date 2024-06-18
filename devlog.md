@@ -23,3 +23,9 @@ Completed:
     write_decimal, skip, peek_u8, get_u8
 To be completed:
     parse, advance, into, get_line, get_decimal, try_into.
+
+18/Jun/2024 1am
+Completed:
+    parse, 
+To be completed:
+    to_vec, 
