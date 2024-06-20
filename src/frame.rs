@@ -1,4 +1,6 @@
-use std::io::Cursor;
+use atoi;
+use core::fmt;
+use std::{io::Cursor, num::TryFromIntError, string::FromUtf8Error};
 
 use bytes::{Buf, Bytes};
 
@@ -15,7 +17,7 @@ pub enum Frame {
 #[derive(Debug)]
 pub enum Error {
     // Not enough data is available to parse a message
-    Imcomplete,
+    Incomplete,
 
     // Invalid message encoding
     Other(crate::Error),
@@ -39,7 +41,7 @@ impl Frame {
                 Ok(Frame::Error(string))
             }
             b':' => {
-                let len = get_decimal(src)?
+                let len = get_decimal(src)?;
                 Ok(Frame::Integer(len))
             }
             b'$' => {
@@ -51,12 +53,12 @@ impl Frame {
                     }
 
                     Ok(Frame::Null)
-                }else {
-                    let len = get_decimal(src)?;
+                } else {
+                    let len = get_decimal(src)?.try_into()?;
                     let n = len + 2;
 
                     if src.remaining() < n {
-                        return Err(Error::Imcomplete);
+                        return Err(Error::Incomplete);
                     }
 
                     let data = Bytes::copy_from_slice(&src.chunk()[..len]);
@@ -118,7 +120,7 @@ impl Frame {
 
 fn peek_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
     if !src.has_remaining() {
-        return Err(Error::Imcomplete);
+        return Err(Error::Incomplete);
     }
 
     Ok(src.chunk()[0])
@@ -126,7 +128,7 @@ fn peek_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
 
 fn get_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
     if !src.has_remaining() {
-        return Err(Error::Imcomplete);
+        return Err(Error::Incomplete);
     }
 
     Ok(src.get_u8())
@@ -134,9 +136,68 @@ fn get_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
 
 fn skip(src: &mut Cursor<&[u8]>, n: usize) -> Result<(), Error> {
     if src.remaining() < n {
-        return Err(Error::Imcomplete);
+        return Err(Error::Incomplete);
     }
 
     src.advance(n);
     Ok(())
+}
+
+fn get_decimal(src: &mut Cursor<&[u8]>) -> Result<u64, Error> {
+    use atoi::atoi;
+
+    let line = get_line(src)?;
+
+    atoi::<u64>(line).ok_or_else(|| "protocol error; invalid frame format".into())
+}
+
+fn get_line<'a>(src: &mut Cursor<&'a [u8]>) -> Result<&'a [u8], Error> {
+    let start = src.position() as usize;
+
+    let end = src.get_ref().len() - 1;
+
+    for i in start..end {
+        if src.get_ref()[i] == b'\r' && src.get_ref()[i + 1] == b'\n' {
+            src.set_position((i + 2) as u64);
+
+            return Ok(&src.get_ref()[start..i]);
+        }
+    }
+
+    Err(Error::Incomplete)
+}
+
+impl From<String> for Error {
+    fn from(src: String) -> Error {
+        Error::Other(src.into())
+    }
+}
+
+impl From<&str> for Error {
+    fn from(src: &str) -> Error {
+        src.to_string().into()
+    }
+}
+
+impl From<FromUtf8Error> for Error {
+    fn from(_src: FromUtf8Error) -> Error {
+        "protocol error; invalid frame format".into()
+    }
+}
+
+impl From<TryFromIntError> for Error {
+    fn from(_src: TryFromIntError) -> Error {
+        "protocol error; invalid frame format".into()
+    }
+}
+
+impl std::error::Error for Error {}
+
+impl fmt::Display for Error {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::Incomplete => "stream ended early".fmt(fmt),
+            Error::Other(err) => err.fmt(fmt),
+        }
+    }
 }

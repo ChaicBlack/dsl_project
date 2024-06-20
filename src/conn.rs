@@ -1,12 +1,9 @@
-use bytes::BytesMut;
-use log::info;
+use bytes::{Buf, BytesMut};
 use std::io::{self, Cursor};
-use std::net::SocketAddr;
 use tokio::io::{AsyncReadExt, AsyncWriteExt, BufWriter};
 use tokio::net::TcpStream;
 
 use crate::frame::{self, Frame};
-use crate::node::Node;
 
 pub struct Connection {
     stream: BufWriter<TcpStream>,
@@ -114,7 +111,7 @@ impl Connection {
     }
 
     fn parse_frame(&mut self) -> crate::Result<Option<Frame>> {
-        use frame::Error::Imcomplete;
+        use frame::Error::Incomplete;
 
         let mut buf = Cursor::new(&self.buffer[..]);
 
@@ -131,32 +128,9 @@ impl Connection {
                 Ok(Some(frame))
             }
 
-            Err(Imcomplete) => Ok(None),
+            Err(Incomplete) => Ok(None),
 
             Err(e) => Err(e.into()),
         }
-    }
-}
-
-impl Node {
-    //This need to be refactored after send_message been completed
-    pub fn broadcast(&self, message: &str) {
-        for neighbor in &self.neighbors {
-            if let Err(e) = self.send_message(message, neighbor) {
-                info!("Failed to send message to {}, {}", neighbor.to_string(), e);
-                return;
-            }
-            info!("{} broadcast to neighbors.", self.addr.to_string());
-        }
-    }
-
-    // Afte all I need to implement a dedicated task to handle IO using mpsc.
-    pub async fn send_message(&self, message: &str, target: &SocketAddr) -> io::Result<()> {
-        let socket = TcpStream::connect(target).await?;
-
-        socket.write_frame(Frame).await?; // I need to implement my own Frame and connection just
-                                          // like mini_redis in tutorial
-
-        Ok(())
     }
 }

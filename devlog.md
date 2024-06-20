@@ -26,6 +26,12 @@ To be completed:
 
 18/Jun/2024 1am
 Completed:
-    parse, 
+    parse,
 To be completed:
     to_vec, into, advance, get_line, get_decimal, try_into
+
+20/Jun/2024 night
+Completed:
+    get_decimal, get_line, from, try_into, impl others
+To be completed:
+    implementing ping pong between 2 nodes.
