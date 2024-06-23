@@ -42,3 +42,9 @@ Completed:
     Feagured out what the meaning of cmd and parse.
 To be completed:
     The remainning of parse.rs, and feaguring out my own cmd list.
+
+23/Jun/2024 night
+Completed:
+    next_bytes, next_string, next_int, parse.rs.
+To be completed:
+  Feaguring out my own cmd list.
