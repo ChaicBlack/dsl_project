@@ -35,3 +35,10 @@ Completed:
     get_decimal, get_line, from, try_into, impl others
 To be completed:
     implementing ping pong between 2 nodes.
+
+23/Jun/2024 morning
+Completed:
+    struct Parse, enum ParseError, From<String> for ParseError, impl new and next for Parse.
+    Feagured out what the meaning of cmd and parse.
+To be completed:
+    The remainning of parse.rs, and feaguring out my own cmd list.
