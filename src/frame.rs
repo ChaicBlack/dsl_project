@@ -4,6 +4,7 @@ use std::{io::Cursor, num::TryFromIntError, string::FromUtf8Error};
 
 use bytes::{Buf, Bytes};
 
+/// A frame in the Redis protocol.
 #[derive(Clone, Debug)]
 pub enum Frame {
     Simple(String),
@@ -24,6 +25,43 @@ pub enum Error {
 }
 
 impl Frame {
+    /// Checks if an entire message can be decoded from `src`
+    pub fn check(src: &mut Cursor<&[u8]>) -> Result<(), Error> {
+        match get_u8(src)? {
+            b'+' => {
+                get_line(src)?;
+                Ok(())
+            }
+            b'-' => {
+                get_line(src)?;
+                Ok(())
+            }
+            b':' => {
+                let _ = get_decimal(src)?;
+                Ok(())
+            }
+            b'$' => {
+                if b'-' == peek_u8(src)? {
+                    skip(src, 4)
+                } else {
+                    let len: usize = get_decimal(src)?.try_into()?;
+                    skip(src, len + 2)
+                }
+            }
+            b'*' => {
+                let len = get_decimal(src)?;
+
+                for _ in 0..len {
+                    Frame::check(src)?;
+                }
+
+                Ok(())
+            }
+            actual => Err(format!("protocol error; invalid frame type byte `{}`", actual).into()),
+        }
+    }
+
+    /// The message has already been validated with `check`.
     pub fn parse(src: &mut Cursor<&[u8]>) -> Result<Frame, Error> {
         match get_u8(src)? {
             b'+' => {
@@ -79,41 +117,6 @@ impl Frame {
                 Ok(Frame::Array(out))
             }
             _ => unimplemented!(),
-        }
-    }
-
-    pub fn check(src: &mut Cursor<&[u8]>) -> Result<(), Error> {
-        match get_u8(src)? {
-            b'+' => {
-                get_line(src)?;
-                Ok(())
-            }
-            b'-' => {
-                get_line(src)?;
-                Ok(())
-            }
-            b':' => {
-                let _ = get_decimal(src)?;
-                Ok(())
-            }
-            b'$' => {
-                if b'-' == peek_u8(src)? {
-                    skip(src, 4)
-                } else {
-                    let len: usize = get_decimal(src)?.try_into()?;
-                    skip(src, len + 2)
-                }
-            }
-            b'*' => {
-                let len = get_decimal(src)?;
-
-                for _ in 0..len {
-                    Frame::check(src)?;
-                }
-
-                Ok(())
-            }
-            actual => Err(format!("protocol error; invalid frame type byte `{}`", actual).into()),
         }
     }
 }
