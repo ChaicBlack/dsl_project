@@ -1,3 +1,11 @@
+24/Jun/2024 night
+Completed:
+  added some comments for conn.rs and frame.rs.
+  complete the frame.rs.
+  start a db.rs.
+To be completed:
+  I need to use a db intance for the library because asynchronous operations could lead to data race.
+
 23/Jun/2024 night
 Completed:
     next_bytes, next_string, next_int, parse.rs.

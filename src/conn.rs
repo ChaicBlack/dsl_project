@@ -5,12 +5,16 @@ use tokio::net::TcpStream;
 
 use crate::frame::{self, Frame};
 
+/// Send and receive `Frame` values from a remote peer.
+#[derive(Debug)]
 pub struct Connection {
     stream: BufWriter<TcpStream>,
     buffer: BytesMut,
 }
 
 impl Connection {
+    /// Create a new `Connection`, backed by `socket`. Read and write buffers
+    /// are initialized.
     pub fn new(socket: TcpStream) -> Connection {
         Connection {
             stream: BufWriter::new(socket),
@@ -19,6 +23,7 @@ impl Connection {
         }
     }
 
+    /// Read a single `Frame` value from the underlying stream.
     pub async fn read_frame(&mut self) -> crate::Result<Option<Frame>> {
         loop {
             // if there are a whole frame in the buffer, read it and return
@@ -40,6 +45,7 @@ impl Connection {
         }
     }
 
+    /// Write a single `Frame` value to the underlying stream.
     pub async fn write_frame(&mut self, frame: &Frame) -> io::Result<()> {
         match frame {
             Frame::Array(val) => {
@@ -59,6 +65,7 @@ impl Connection {
         self.stream.flush().await
     }
 
+    /// Write a frame literal to the stream
     async fn write_value(&mut self, frame: &Frame) -> io::Result<()> {
         match frame {
             Frame::Simple(val) => {
@@ -109,7 +116,7 @@ impl Connection {
 
         Ok(())
     }
-
+    /// Tries to parse a frame from the buffer.
     fn parse_frame(&mut self) -> crate::Result<Option<Frame>> {
         use frame::Error::Incomplete;
 

@@ -25,6 +25,33 @@ pub enum Error {
 }
 
 impl Frame {
+    /// Returns an empty array.
+    pub(crate) fn array() -> Frame {
+        Frame::Array(vec![])
+    }
+
+    /// Push a "bulk" frame into the array. 'self' must an array frame.
+    /// panics if 'self' is not an array.
+    pub(crate) fn push_bulk(&mut self, bytes: Bytes) {
+        match self {
+            Frame::Array(vec) => {
+                vec.push(Frame::Bulk(bytes));
+            }
+            _ => panic!("not an array frame"),
+        }
+    }
+
+    /// Push an "integer" frame into the array. 'self' must be an array frame.
+    /// panics if 'self' is not an array.
+    pub(crate) fn push_int(&mut self, value: u64) {
+        match self {
+            Frame::Array(vec) => {
+                vec.push(Frame::Integer(value));
+            }
+            _ => panic!("not an array frame"),
+        }
+    }
+
     /// Checks if an entire message can be decoded from `src`
     pub fn check(src: &mut Cursor<&[u8]>) -> Result<(), Error> {
         match get_u8(src)? {
@@ -117,6 +144,50 @@ impl Frame {
                 Ok(Frame::Array(out))
             }
             _ => unimplemented!(),
+        }
+    }
+
+    /// Converts the frame to an "unexpected frame" error
+    pub(crate) fn to_error(&self) -> crate::Error {
+        format!("unexpected frame: {}", self).into()
+    }
+}
+
+impl PartialEq<&str> for Frame {
+    fn eq(&self, other: &&str) -> bool {
+        match self {
+            Frame::Simple(s) => s.eq(other),
+            Frame::Bulk(s) => s.eq(other),
+            _ => false,
+        }
+    }
+}
+
+impl fmt::Display for Frame {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        use std::str;
+
+        match self {
+            Frame::Simple(response) => response.fmt(fmt),
+            Frame::Error(msg) => write!(fmt, "error: {}", msg),
+            Frame::Integer(num) => num.fmt(fmt),
+            Frame::Bulk(msg) => match str::from_utf8(msg) {
+                Ok(string) => string.fmt(fmt),
+                Err(_) => write!(fmt, "{:?}", msg),
+            },
+            Frame::Null => "(nil)".fmt(fmt),
+            Frame::Array(parts) => {
+                for (i, part) in parts.iter().enumerate() {
+                    if i > 0 {
+                        // use space to seperate array element.
+                        write!(fmt, " ")?;
+                    }
+
+                    part.fmt(fmt)?;
+                }
+
+                Ok(())
+            }
         }
     }
 }

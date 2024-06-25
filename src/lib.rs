@@ -4,7 +4,10 @@ pub use conn::Connection;
 pub mod frame;
 pub use frame::Frame;
 
-mod node;
+mod db;
+use db::Db;
+use db::DbDropGuard;
+
 mod parse;
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
