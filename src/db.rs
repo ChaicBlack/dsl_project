@@ -4,8 +4,6 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use bytes::Bytes;
-
 /// Server state shared across all connections.
 ///
 /// `Db` contains a `HashMap` storing the key/value data.
@@ -20,7 +18,7 @@ pub(crate) struct Db {
     /// not a Tokio mutex. This is because there are no asynchronous operations
     /// being performed while holding the mutex. Additionally, the critical
     /// sections are very small.
-    log: Arc<Mutex<HashMap<String, Bytes>>>,
+    log: Arc<Mutex<HashMap<u64, String>>>,
 
     /// Handle the neighboring nodes' address.
     ///
@@ -35,5 +33,37 @@ impl Db {
         let neighbors = Arc::new(Mutex::new(HashMap::new()));
 
         Db { log, neighbors }
+    }
+
+    /// Get the value associated with a key.
+    pub(crate) fn get_log(&self, key: u64) -> Option<String> {
+        let log = self.log.lock().unwrap();
+
+        log.get(&key).map(|x| x.clone())
+    }
+
+    /// Set a value of a key.
+    ///
+    /// If a value already assosiated with the key, it's removed.
+    pub(crate) fn set_log(&self, key: u64, value: &str) {
+        let mut log = self.log.lock().unwrap();
+
+        log.insert(key, value.to_string());
+    }
+
+    /// Get the value associated with a key.
+    pub(crate) fn get_neighbor(&self, key: u64) -> Option<SocketAddr> {
+        let neighbor = self.neighbors.lock().unwrap();
+
+        neighbor.get(&key).map(|x| x.clone())
+    }
+
+    /// Set a value of a key.
+    ///
+    /// If a value already assosiated with the key, it's removed.
+    pub(crate) fn set_neighbor(&self, key: u64, value: &SocketAddr) {
+        let mut neighbor = self.neighbors.lock().unwrap();
+
+        neighbor.insert(key, value.clone());
     }
 }

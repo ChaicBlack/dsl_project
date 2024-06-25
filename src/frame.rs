@@ -1,5 +1,5 @@
 use atoi;
-use core::fmt;
+use std::fmt;
 use std::{io::Cursor, num::TryFromIntError, string::FromUtf8Error};
 
 use bytes::{Buf, Bytes};

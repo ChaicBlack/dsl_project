@@ -1,3 +1,15 @@
+25/Jun/2024 night
+Completed:
+    Completed the ds.rs, think a lot about my project:
+    I can use frameworks like serde, tonic, etc. But those frameworks are too big
+    and I don't need that many features because I just need a little of them.
+    At first I failed to build a demo on my conn and frame mod. Then I began to use tokio_util
+    to complete this. Later I found that there was a mistake on my implemtation of redis protocol.
+    After fixed that, things worked. I can use those frames to build various command and messages.
+To be completed:
+    heartbeat, broadcast and snapshoot.
+    and I need to implement backup when needed.
+
 25/Jun/2024 afternoon
 Completed:
     Do something on the Db. The Db will be responsible for use for handle data
@@ -7,11 +19,11 @@ To be completed:
 
 24/Jun/2024 night
 Completed:
-  added some comments for conn.rs and frame.rs.
-  complete the frame.rs.
-  start a db.rs.
+    added some comments for conn.rs and frame.rs.
+   complete the frame.rs.
+   start a db.rs.
 To be completed:
-  I need to use a db intance for the library because asynchronous operations could lead to data race.
+   I need to use a db intance for the library because asynchronous operations could lead to data race.
 
 23/Jun/2024 night
 Completed:

@@ -69,7 +69,7 @@ impl Connection {
     async fn write_value(&mut self, frame: &Frame) -> io::Result<()> {
         match frame {
             Frame::Simple(val) => {
-                self.stream.write_u8(b'*').await?;
+                self.stream.write_u8(b'+').await?;
                 self.stream.write_all(val.as_bytes()).await?;
                 self.stream.write_all(b"\r\n").await?;
             }
@@ -107,7 +107,7 @@ impl Connection {
         // convert the value to a string
         let mut buf = [0u8; 20];
         let mut buf = Cursor::new(&mut buf[..]);
-        write!(&mut buf, "{}", val);
+        write!(&mut buf, "{}", val)?;
 
         let pos = buf.position() as usize;
         // get_ref() return the reference to inner value
@@ -116,6 +116,7 @@ impl Connection {
 
         Ok(())
     }
+
     /// Tries to parse a frame from the buffer.
     fn parse_frame(&mut self) -> crate::Result<Option<Frame>> {
         use frame::Error::Incomplete;
