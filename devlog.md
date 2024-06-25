@@ -1,3 +1,10 @@
+25/Jun/2024 afternoon
+Completed:
+    Do something on the Db. The Db will be responsible for use for handle data
+    which maybe visited repeatly. Such as log and neighbor nodes.
+To be completed:
+    I need to implement a short version of ping-pong.
+
 24/Jun/2024 night
 Completed:
   added some comments for conn.rs and frame.rs.
