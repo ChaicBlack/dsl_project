@@ -1,6 +1,9 @@
 mod conn;
 pub use conn::Connection;
 
+pub mod msg;
+pub use msg::Message;
+
 pub mod frame;
 pub use frame::Frame;
 
