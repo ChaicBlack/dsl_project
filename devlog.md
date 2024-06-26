@@ -1,6 +1,14 @@
+26/Jun/2024 evening
+Completed:
+    The skeleton of msg.rs, there could be message type in the future.
+    By the way, I need to think about the operation by the node self, for example propose in Paxos.
+To be Completed:
+    I need to read the raft, viewstamp and pbft paper, to get the operation they use. There must be more in the Db and Message.
+    And the specific message operation need to be implemented.
+
 25/Jun/2024 night
 Completed:
-    Completed the ds.rs, think a lot about my project:
+    Completed the db.rs, think a lot about my project:
     I can use frameworks like serde, tonic, etc. But those frameworks are too big
     and I don't need that many features because I just need a little of them.
     At first I failed to build a demo on my conn and frame mod. Then I began to use tokio_util
