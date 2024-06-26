@@ -106,7 +106,7 @@ impl Parse {
 
         match self.next()? {
             // An Integer frame is already stored as an int.
-            Frame::Integer(I) => Ok(I),
+            Frame::Integer(val) => Ok(val),
             // Simple and bulk need to be parsed to int. If parsing fails,
             // an error is returned.
             Frame::Simple(data) => atoi::<u64>(data.as_bytes()).ok_or_else(|| MSG.into()),
