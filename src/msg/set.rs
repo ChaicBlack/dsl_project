@@ -55,7 +55,7 @@ impl Set {
     /// ```text
     /// SET key value
     /// ```
-    pub(crate) fn parse_frame(parse: &mut Parse) -> crate::Result<Set> {
+    pub(crate) fn parse_frames(parse: &mut Parse) -> crate::Result<Set> {
         // Read the key to set. This is a required field
         let key = parse.next_int()?;
 

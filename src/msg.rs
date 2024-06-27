@@ -1,14 +1,14 @@
 mod get;
 pub use get::Get;
 
-mod heartbeat;
-pub use heartbeat::HeartBeat;
-
 mod set;
 pub use set::Set;
 
 mod ping;
 pub use ping::Ping;
+
+mod unknown;
+pub use unknown::Unknown;
 
 use crate::{Connection, Db, Frame, Parse, ParseError};
 
@@ -18,7 +18,6 @@ use crate::{Connection, Db, Frame, Parse, ParseError};
 #[derive(Debug)]
 pub enum Message {
     Get(Get),
-    HeartBeat(HeartBeat),
     Set(Set),
     Ping(Ping),
     Unknown(Unknown),
@@ -44,7 +43,6 @@ impl Message {
         // message.
         let message = match &message_name[..] {
             "get" => Message::Get(Get::parse_frames(&mut parse)?),
-            "heartbeat" => Message::HeartBeat(HeartBeat::parse_frames(&mut parse)?),
             "set" => Message::Set(Set::parse_frames(&mut parse)?),
             "ping" => Message::Ping(Ping::parse_frames(&mut parse)?),
             _ => {
@@ -75,9 +73,8 @@ impl Message {
 
         match self {
             Get(msg) => msg.apply(db, dst).await,
-            HeartBeat(msg) => msg.apply(dst).await,
             Set(msg) => msg.apply(db, dst).await,
-            Ping(msg) => msg(dst).await,
+            Ping(msg) => msg.apply(dst).await,
             Unknown(msg) => msg.apply(dst).await,
         }
     }
@@ -86,7 +83,6 @@ impl Message {
     pub(crate) fn get_name(&self) -> &str {
         match self {
             Message::Get(_) => "get",
-            Message::HeartBeat(_) => "heartbeat",
             Message::Set(_) => "set",
             Message::Ping(_) => "ping",
             Message::Unknown(msg) => msg.get_name(),
