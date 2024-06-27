@@ -1,3 +1,10 @@
+27/Jun/2024 afternoon
+Completed:
+    Implementation of Get message, notice that this is different from Get command in redis because this key is u64 and value is String while in redis is String and bytes.
+To be completed:
+    other message type.
+    server and client.
+
 26/Jun/2024 evening
 Completed:
     The skeleton of msg.rs, there could be message type in the future.
