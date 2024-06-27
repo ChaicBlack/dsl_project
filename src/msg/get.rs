@@ -1,5 +1,3 @@
-use std::io::Read;
-
 use crate::{Connection, Db, Frame, Parse};
 
 use bytes::Bytes;
@@ -10,6 +8,7 @@ use tracing::{debug, instrument};
 /// If the key does not exist the special value nil is returned. An error is
 /// returned if the value stored at key is not a u64, because GET only
 /// handles u64 values.
+#[derive(Debug)]
 pub struct Get {
     /// Name of the key to get.
     key: u64,

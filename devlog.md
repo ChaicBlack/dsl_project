@@ -1,3 +1,11 @@
+28/Jun/2024 evening
+Several things to say:
+    1. The 'Frame' is actually RESP(Redis serialization protocol), a fast and easy to implement serialization protocol.
+    2. The message type need to be extended later, carrying sender's infomation.
+    3. The 'apply' method of each message type need to be extended when operations need.
+    4. Need to implement snapshot, using serde. And maybe referencing to RDB and AOF of redis can help.
+    5. Need to use snapshot as crash-recovery methods.
+
 27/Jun/2024 afternoon
 Completed:
     Implementation of Get message, notice that this is different from Get command in redis because this key is u64 and value is String while in redis is String and bytes.

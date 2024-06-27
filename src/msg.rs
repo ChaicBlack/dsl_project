@@ -17,7 +17,7 @@ use crate::{Connection, Db, Frame, Parse, ParseError};
 /// Methods called on 'Message' are delegated to the Message implementation.
 #[derive(Debug)]
 pub enum Message {
-    Get(get),
+    Get(Get),
     HeartBeat(HeartBeat),
     Set(Set),
     Ping(Ping),
@@ -70,7 +70,7 @@ impl Message {
     /// Apply the operation counter to specific message type.
     ///
     /// This is called by the nodes that receives a message.
-    pub(crate) async fn apply(self, db: Db, dst: &mut Connection) -> crate::Result<()> {
+    pub(crate) async fn apply(self, db: &Db, dst: &mut Connection) -> crate::Result<()> {
         use Message::*;
 
         match self {
