@@ -1,20 +1,23 @@
 PinBoard:
-    1. The 'Frame' is actually RESP(Redis serialization protocol), a fast and easy to implement serialization protocol.
-    2. The message types need to be extended later, carrying sender's infomation.
-    3. The 'apply' method of each message type need to be extended when operations need.
-    4. Need to implement snapshot, using serde. And maybe referencing to RDB and AOF of redis can help.
-    5. Need to use snapshot as crash-recovery methods.
+    . The message types need to be extended later, carrying sender's infomation.
+    . The 'apply' method of each message type need to be extended when operations need.
+    . Need to implement snapshot, using serde. And maybe referencing to RDB and AOF of redis can help.
+    . Need to use snapshot as crash-recovery methods.
 
-28/Jun/2024 night(2)
+28/Jun/2024 evening
+Completed:
+    A simple demo of ping-pong. (Just cargo run --bin server and client)
+
+27/Jun/2024 night(2)
 Completed:
     The Set message.
     The Unknown message.
 
-28/Jun/2024 night
+27/Jun/2024 night
 Completed:
     The Ping message, looks like I don't have to implement heartbeat because it is identical with Ping.
 
-28/Jun/2024 evening
+27/Jun/2024 evening
 Several things to say:
     1. The 'Frame' is actually RESP(Redis serialization protocol), a fast and easy to implement serialization protocol.
     2. The message type need to be extended later, carrying sender's infomation.

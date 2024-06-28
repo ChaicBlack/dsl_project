@@ -1,4 +1,4 @@
-use dsl_project::{frame, Connection};
+use dsl_project::{msg::Ping, Connection, Message};
 
 use tokio;
 use tokio::net::TcpStream;
@@ -27,14 +27,4 @@ impl Node {
 }
 
 #[tokio::main()]
-async fn main() -> io::Result<()> {
-    let socket = TcpStream::connect("127.0.0.1:8080").await?;
-
-    let mut con = Connection::new(socket);
-
-    let msg = frame::Frame::Simple("hello".to_string());
-
-    con.write_frame(&msg).await?;
-
-    Ok(())
-}
+async fn main() -> io::Result<()> {}
