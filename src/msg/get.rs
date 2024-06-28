@@ -85,11 +85,7 @@ impl Get {
     pub(crate) fn into_frame(self) -> Frame {
         let mut frame = Frame::array();
         frame.push_bulk(Bytes::from("get".as_bytes()));
-        // Equals to
-        // ```
-        // frame.push_bulk(self.key.to_be_bytes().as_ref().to_vec().into());
-        // ```
-        frame.push_bulk(Bytes::copy_from_slice(self.key.to_be_bytes().as_ref()));
+        frame.push_int(self.key);
         frame
     }
 }
