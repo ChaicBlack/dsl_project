@@ -4,6 +4,10 @@ PinBoard:
     . Need to implement snapshot, using serde. And maybe referencing to RDB and AOF of redis can help.
     . Need to use snapshot as crash-recovery methods.
 
+30/Jun/2024 afternoon
+Completed:
+    something about config and heartbeat.
+
 28/Jun/2024 evening
 Completed:
     A simple demo of ping-pong. (Just cargo run --bin server and client)

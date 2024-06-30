@@ -25,6 +25,3 @@ impl Node {
         }
     }
 }
-
-#[tokio::main()]
-async fn main() -> io::Result<()> {}

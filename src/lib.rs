@@ -1,3 +1,6 @@
+mod config;
+pub use config::Config;
+
 mod conn;
 pub use conn::Connection;
 

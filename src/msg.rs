@@ -7,6 +7,9 @@ pub use set::Set;
 mod ping;
 pub use ping::Ping;
 
+mod heartbeat;
+pub use heartbeat::HeartBeat;
+
 mod unknown;
 pub use unknown::Unknown;
 
@@ -20,6 +23,7 @@ pub enum Message {
     Get(Get),
     Set(Set),
     Ping(Ping),
+    HeartBeat(HeartBeat),
     Unknown(Unknown),
 }
 
@@ -45,6 +49,7 @@ impl Message {
             "get" => Message::Get(Get::parse_frames(&mut parse)?),
             "set" => Message::Set(Set::parse_frames(&mut parse)?),
             "ping" => Message::Ping(Ping::parse_frames(&mut parse)?),
+            "heartbeat" => Message::HeartBeat(HeartBeat::parse_frames(&mut parse)?),
             _ => {
                 // The message is not recognized and an Unknown message is
                 // returned.
@@ -75,6 +80,7 @@ impl Message {
             Get(msg) => msg.apply(db, dst).await,
             Set(msg) => msg.apply(db, dst).await,
             Ping(msg) => msg.apply(dst).await,
+            HeartBeat(msg) => msg.apply(db).await,
             Unknown(msg) => msg.apply(dst).await,
         }
     }
@@ -85,6 +91,7 @@ impl Message {
             Message::Get(_) => "get",
             Message::Set(_) => "set",
             Message::Ping(_) => "ping",
+            Message::HeartBeat(_) => "heartbeat",
             Message::Unknown(msg) => msg.get_name(),
         }
     }
