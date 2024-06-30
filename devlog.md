@@ -4,6 +4,11 @@ PinBoard:
     . Need to implement snapshot, using serde. And maybe referencing to RDB and AOF of redis can help.
     . Need to use snapshot as crash-recovery methods.
 
+30/Jun/2024 night
+Completed:
+    'apply' method can just apply for specific 4 message types, others need to do there own job.
+    There is a state I have to implement, but I don't know how to decide which field need to be thread-safe which needn't to be.
+
 30/Jun/2024 afternoon
 Completed:
     something about config and heartbeat.

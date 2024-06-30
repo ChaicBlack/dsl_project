@@ -4,6 +4,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use crate::State;
+
 /// Server state shared across all connections.
 ///
 /// `Db` contains a `HashMap` storing the key/value data.
@@ -12,12 +14,17 @@ use std::{
 /// only incurs an atomic ref count increment.
 #[derive(Debug, Clone)]
 pub(crate) struct Db {
+    /// State for algorithm except log.
+    //state: Arc<State>,
+
     /// Handle to log.
     ///
     /// The log is guarded by a mutex. This is a `std::sync::Mutex` and
     /// not a Tokio mutex. This is because there are no asynchronous operations
     /// being performed while holding the mutex. Additionally, the critical
     /// sections are very small.
+    ///
+    /// Needed to updated on stable storage before responding RPCs.
     log: Arc<Mutex<HashMap<u64, String>>>,
 
     /// Handle the neighboring nodes' address.

@@ -9,11 +9,14 @@ pub use msg::Message;
 pub mod frame;
 pub use frame::Frame;
 
+mod parse;
+use parse::{Parse, ParseError};
+
 mod db;
 use db::Db;
 
-mod parse;
-use parse::{Parse, ParseError};
+mod state;
+pub use state::State;
 
 mod server;
 pub use server::server;
