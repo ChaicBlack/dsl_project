@@ -23,8 +23,10 @@ pub enum Message {
     Get(Get),
     Set(Set),
     Ping(Ping),
-    HeartBeat(HeartBeat),
     Unknown(Unknown),
+
+    // Below message types haven't implement 'apply' method.
+    HeartBeat(HeartBeat),
 }
 
 impl Message {
@@ -73,6 +75,8 @@ impl Message {
     /// Apply the operation counter to specific message type.
     ///
     /// This is called by the nodes that receives a message.
+    ///
+    /// Notice: Only 'Get', 'Set', 'Ping', 'Unknown' implements 'apply' method.
     pub(crate) async fn apply(self, db: &Db, dst: &mut Connection) -> crate::Result<()> {
         use Message::*;
 
@@ -80,8 +84,8 @@ impl Message {
             Get(msg) => msg.apply(db, dst).await,
             Set(msg) => msg.apply(db, dst).await,
             Ping(msg) => msg.apply(dst).await,
-            HeartBeat(msg) => msg.apply(db).await,
             Unknown(msg) => msg.apply(dst).await,
+            _ => Err("Message type don't implement 'apply' method.".into()),
         }
     }
 
@@ -91,8 +95,9 @@ impl Message {
             Message::Get(_) => "get",
             Message::Set(_) => "set",
             Message::Ping(_) => "ping",
-            Message::HeartBeat(_) => "heartbeat",
             Message::Unknown(msg) => msg.get_name(),
+
+            Message::HeartBeat(_) => "heartbeat",
         }
     }
 }

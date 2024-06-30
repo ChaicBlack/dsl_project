@@ -1,4 +1,4 @@
-use crate::{Db, Frame, Parse, ParseError};
+use crate::{config, Frame, Parse, ParseError};
 
 use bytes::Bytes;
 
@@ -11,23 +11,39 @@ pub struct HeartBeat {
 }
 
 impl HeartBeat {
-    pub fn new(db: &Db) -> HeartBeat {
-        HeartBeat {
-            id: db.get_config().get_id(),
-        }
+    pub(crate) fn new() -> HeartBeat {
+        HeartBeat { id: config::ID }
     }
 
+    /// Parse a `HeartBeat` instance from a received frame.
+    ///
+    /// The `HEARTBEAT` string has already been consumed.
+    ///
+    /// # Returns
+    ///
+    /// Returns the `HeartBeat` value on success. If the frame is malformed, `Err` is
+    /// returned.
+    ///
+    /// # Format
+    ///
+    /// Expects an array frame containing two entries.
+    ///
+    /// ```text
+    /// HEARTBEAT id
+    /// ```
     pub(crate) fn parse_frames(parse: &mut Parse) -> crate::Result<HeartBeat> {
+        // The `HEARTBEAT` string has already been consumed. The next value is the
+        // name of the id to get. If the next value is not a u64 or the
+        // input is fully consumed, then an error is returned.
         let id = parse.next_int()?;
 
         Ok(HeartBeat { id })
     }
 
-    pub(crate) async fn apply(self, db: &Db) -> crate::Result<()> {
-        // need to be added.
-        Ok(())
-    }
-
+    /// Converts the message into an equivalent `Frame`.
+    ///
+    /// This is called by the client when encoding a `HeartBeat` message to send to
+    /// the server.
     pub(crate) fn into_frame(self) -> Frame {
         let mut frame = Frame::array();
         frame.push_bulk(Bytes::from("heartbeat".as_bytes()));

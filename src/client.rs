@@ -1,11 +1,11 @@
-use crate::{msg::Ping, Connection, Frame};
+use crate::{config, msg::Ping, Connection, Frame};
 
 use std::io;
 
 use tokio::net::TcpStream;
 
 pub async fn client() -> io::Result<()> {
-    let socket = TcpStream::connect("127.0.0.1:8080").await?;
+    let socket = TcpStream::connect(config::ADDR).await?;
 
     let mut con = Connection::new(socket);
 

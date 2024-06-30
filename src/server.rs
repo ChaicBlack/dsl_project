@@ -1,4 +1,4 @@
-use crate::{Config, Connection, Db, Message};
+use crate::{config, Connection, Db, Message};
 
 use tokio;
 use tokio::net::TcpListener;
@@ -8,13 +8,11 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 
 pub async fn server() -> io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:8080").await?;
+    let listener = TcpListener::bind(config::ADDR).await?;
 
-    println!("Server running on 127.0.0.1:8080");
+    println!("Server running on {}", &config::ADDR);
 
-    let config = Config::new(1, SocketAddr::from_str("127.0.0.1:8080").unwrap());
-
-    let db = Db::new(&config);
+    let db = Db::new();
 
     loop {
         let (socket, _) = listener.accept().await?;

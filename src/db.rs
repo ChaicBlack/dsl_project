@@ -4,8 +4,6 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::Config;
-
 /// Server state shared across all connections.
 ///
 /// `Db` contains a `HashMap` storing the key/value data.
@@ -14,7 +12,6 @@ use crate::Config;
 /// only incurs an atomic ref count increment.
 #[derive(Debug, Clone)]
 pub(crate) struct Db {
-    config: Config,
     /// Handle to log.
     ///
     /// The log is guarded by a mutex. This is a `std::sync::Mutex` and
@@ -30,16 +27,12 @@ pub(crate) struct Db {
 }
 
 impl Db {
-    pub(crate) fn new(config: &Config) -> Db {
+    pub(crate) fn new() -> Db {
         let log = Arc::new(Mutex::new(HashMap::new()));
 
         let neighbors = Arc::new(Mutex::new(HashMap::new()));
 
-        Db {
-            config: config.clone(),
-            log,
-            neighbors,
-        }
+        Db { log, neighbors }
     }
 
     /// Get the value associated with a key.
@@ -72,9 +65,5 @@ impl Db {
         let mut neighbor = self.neighbors.lock().unwrap();
 
         neighbor.insert(key, value.clone());
-    }
-
-    pub fn get_config(&self) -> Config {
-        self.config.clone()
     }
 }
